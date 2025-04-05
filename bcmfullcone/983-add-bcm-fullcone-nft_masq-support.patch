@@ -1,6 +1,17 @@
+--- a/include/net/netfilter/nf_tables.h
++++ b/include/net/netfilter/nf_tables.h
+@@ -256,6 +256,8 @@ static inline enum nft_registers nft_typ
+ int nft_parse_u32_check(const struct nlattr *attr, int max, u32 *dest);
+ int nft_dump_register(struct sk_buff *skb, unsigned int attr, unsigned int reg);
+ 
++int nft_parse_register_load_legacy(const struct nlattr *attr, u8 *sreg, u32 len);
++
+ int nft_parse_register_load(const struct nft_ctx *ctx,
+ 			    const struct nlattr *attr, u8 *sreg, u32 len);
+ int nft_parse_register_store(const struct nft_ctx *ctx,
 --- a/include/uapi/linux/netfilter/nf_tables.h
 +++ b/include/uapi/linux/netfilter/nf_tables.h
-@@ -1477,12 +1477,16 @@ enum nft_tproxy_attributes {
+@@ -1481,12 +1481,16 @@ enum nft_tproxy_attributes {
   * @NFTA_MASQ_FLAGS: NAT flags (see NF_NAT_RANGE_* in linux/netfilter/nf_nat.h) (NLA_U32)
   * @NFTA_MASQ_REG_PROTO_MIN: source register of proto range start (NLA_U32: nft_registers)
   * @NFTA_MASQ_REG_PROTO_MAX: source register of proto range end (NLA_U32: nft_registers)
@@ -17,6 +28,33 @@
  	__NFTA_MASQ_MAX
  };
  #define NFTA_MASQ_MAX		(__NFTA_MASQ_MAX - 1)
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -11152,6 +11152,24 @@ static int nft_validate_register_load(en
+ 	return 0;
+ }
+ 
++int nft_parse_register_load_legacy(const struct nlattr *attr, u8 *sreg, u32 len)
++{
++	u32 reg;
++	int err;
++
++	err = nft_parse_register(attr, &reg);
++	if (err < 0)
++		return err;
++
++	err = nft_validate_register_load(reg, len);
++	if (err < 0)
++		return err;
++
++	*sreg = reg;
++	return 0;
++}
++EXPORT_SYMBOL_GPL(nft_parse_register_load_legacy);
++
+ int nft_parse_register_load(const struct nft_ctx *ctx,
+ 			    const struct nlattr *attr, u8 *sreg, u32 len)
+ {
 --- a/net/netfilter/nft_masq.c
 +++ b/net/netfilter/nft_masq.c
 @@ -17,6 +17,8 @@ struct nft_masq {
@@ -37,7 +75,7 @@
  };
  
  static int nft_masq_validate(const struct nft_ctx *ctx,
-@@ -45,6 +49,7 @@ static int nft_masq_init(const struct nf
+@@ -44,6 +48,7 @@ static int nft_masq_init(const struct nf
  			 const struct nlattr * const tb[])
  {
  	u32 plen = sizeof_field(struct nf_nat_range, min_proto.all);
@@ -45,18 +83,18 @@
  	struct nft_masq *priv = nft_expr_priv(expr);
  	int err;
  
-@@ -68,6 +73,25 @@ static int nft_masq_init(const struct nf
+@@ -67,6 +72,25 @@ static int nft_masq_init(const struct nf
  		}
  	}
  
 +	if (tb[NFTA_MASQ_REG_ADDR_MIN]) {
-+		err = nft_parse_register_load(tb[NFTA_MASQ_REG_ADDR_MIN],
++		err = nft_parse_register_load_legacy(tb[NFTA_MASQ_REG_ADDR_MIN],
 +					      &priv->sreg_addr_min, alen);
 +		if (err < 0)
 +			return err;
 +
 +		if (tb[NFTA_MASQ_REG_ADDR_MAX]) {
-+			err = nft_parse_register_load(tb[NFTA_MASQ_REG_ADDR_MAX],
++			err = nft_parse_register_load_legacy(tb[NFTA_MASQ_REG_ADDR_MAX],
 +						      &priv->sreg_addr_max,
 +						      alen);
 +			if (err < 0)
@@ -71,7 +109,7 @@
  	return nf_ct_netns_get(ctx->net, ctx->family);
  }
  
-@@ -88,6 +112,14 @@ static int nft_masq_dump(struct sk_buff
+@@ -87,6 +111,14 @@ static int nft_masq_dump(struct sk_buff
  			goto nla_put_failure;
  	}
  
@@ -86,7 +124,7 @@
  	return 0;
  
  nla_put_failure:
-@@ -112,6 +144,12 @@ static void nft_masq_eval(const struct n
+@@ -111,6 +143,12 @@ static void nft_masq_eval(const struct n
  
  	switch (nft_pf(pkt)) {
  	case NFPROTO_IPV4:
@@ -99,7 +137,7 @@
  		regs->verdict.code = nf_nat_masquerade_ipv4(pkt->skb,
  							    nft_hook(pkt),
  							    &range,
-@@ -119,6 +157,12 @@ static void nft_masq_eval(const struct n
+@@ -118,6 +156,12 @@ static void nft_masq_eval(const struct n
  		break;
  #ifdef CONFIG_NF_TABLES_IPV6
  	case NFPROTO_IPV6:
