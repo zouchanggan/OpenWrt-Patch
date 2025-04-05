@@ -8,13 +8,12 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
 ---
  include/linux/if_bridge.h                   |  3 +++
  include/linux/skbuff.h                      |  4 +++
- include/linux/timer.h                       |  4 +++
  include/net/netfilter/nf_conntrack_ecache.h |  2 ++
  net/Kconfig                                 |  3 +++
  net/bridge/br_if.c                          | 20 +++++++++++++++
  net/core/dev.c                              | 27 +++++++++++++++++++++
  net/netfilter/nf_conntrack_ecache.c         | 24 +++++++++++++++++-
- 8 files changed, 86 insertions(+), 1 deletion(-)
+ 7 files changed, 86 insertions(+), 1 deletion(-)
 
 --- a/include/linux/if_bridge.h
 +++ b/include/linux/if_bridge.h
@@ -30,29 +29,15 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
  			       struct list_head *br_ip_list);
 --- a/include/linux/skbuff.h
 +++ b/include/linux/skbuff.h
-@@ -985,6 +985,10 @@ struct sk_buff {
+@@ -1011,6 +1011,9 @@ struct sk_buff {
  	__u8			csum_not_inet:1;
  #endif
- 
+ 	__u8			unreadable:1;
 +#ifdef CONFIG_SHORTCUT_FE
 +	__u8			fast_forwarded:1;
 +#endif
-+
  #if defined(CONFIG_NET_SCHED) || defined(CONFIG_NET_XGRESS)
  	__u16			tc_index;	/* traffic control index */
- #endif
---- a/include/linux/timer.h
-+++ b/include/linux/timer.h
-@@ -18,6 +18,10 @@ struct timer_list {
- 	void			(*function)(struct timer_list *);
- 	u32			flags;
- 
-+#ifdef CONFIG_SHORTCUT_FE
-+	unsigned long		cust_data;
-+#endif
-+
- #ifdef CONFIG_LOCKDEP
- 	struct lockdep_map	lockdep_map;
  #endif
 --- a/include/net/netfilter/nf_conntrack_ecache.h
 +++ b/include/net/netfilter/nf_conntrack_ecache.h
@@ -67,7 +52,7 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
  				   const struct nf_ct_event_notifier *nb);
 --- a/net/Kconfig
 +++ b/net/Kconfig
-@@ -504,6 +504,9 @@ config FAILOVER
+@@ -512,6 +512,9 @@ config FAILOVER
  	  migration of VMs with direct attached VFs by failing over to the
  	  paravirtual datapath when the VF is unplugged.
  
@@ -76,7 +61,7 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
 +
  config ETHTOOL_NETLINK
  	bool "Netlink interface for ethtool"
- 	default y
+ 	select DIMLIB
 --- a/net/bridge/br_if.c
 +++ b/net/bridge/br_if.c
 @@ -764,6 +764,26 @@ void br_port_flags_change(struct net_bri
@@ -108,7 +93,7 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
  	struct net_bridge_port *p;
 --- a/net/core/dev.c
 +++ b/net/core/dev.c
-@@ -3594,8 +3594,17 @@ static int xmit_one(struct sk_buff *skb,
+@@ -3643,8 +3643,17 @@ static int xmit_one(struct sk_buff *skb,
  	unsigned int len;
  	int rc;
  
@@ -124,9 +109,9 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
 +	}
 +#endif
  
- #ifdef CONFIG_ETHERNET_PACKET_MANGLE
- 	if (dev->eth_mangle_tx && !(skb = dev->eth_mangle_tx(dev, skb)))
-@@ -5359,6 +5368,11 @@ void netdev_rx_handler_unregister(struct
+ 	len = skb->len;
+ 	trace_net_dev_start_xmit(skb, dev);
+@@ -5485,6 +5494,11 @@ void netdev_rx_handler_unregister(struct
  }
  EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
  
@@ -138,7 +123,7 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
  /*
   * Limit the use of PFMEMALLOC reserves to those protocols that implement
   * the special handling of PFMEMALLOC skbs.
-@@ -5407,6 +5421,10 @@ static int __netif_receive_skb_core(stru
+@@ -5533,6 +5547,10 @@ static int __netif_receive_skb_core(stru
  	int ret = NET_RX_DROP;
  	__be16 type;
  
@@ -146,10 +131,10 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
 +	int (*fast_recv)(struct sk_buff *skb);
 +#endif
 +
- 	net_timestamp_check(!READ_ONCE(netdev_tstamp_prequeue), skb);
+ 	net_timestamp_check(!READ_ONCE(net_hotdata.tstamp_prequeue), skb);
  
  	trace_netif_receive_skb(skb);
-@@ -5444,6 +5462,15 @@ another_round:
+@@ -5571,6 +5589,16 @@ another_round:
  			goto out;
  	}
  
@@ -162,6 +147,7 @@ Signed-off-by: Xiaoping Fan <xfan@codeaurora.org>
 +		}
 +	}
 +#endif
++
  	if (skb_skip_tc_classify(skb))
  		goto skip_classify;
  
