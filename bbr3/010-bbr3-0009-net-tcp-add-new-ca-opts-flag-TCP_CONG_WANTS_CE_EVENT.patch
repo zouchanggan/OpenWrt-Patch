@@ -1,7 +1,7 @@
-From a1ee90ba05c238f06d875c9ed324f5bd01c417ae Mon Sep 17 00:00:00 2001
+From d39a6429c0ec67f51478737f7a13f6295ca8b3c0 Mon Sep 17 00:00:00 2001
 From: Yousuk Seung <ysseung@google.com>
 Date: Wed, 23 May 2018 17:55:54 -0700
-Subject: [PATCH 09/18] net-tcp: add new ca opts flag TCP_CONG_WANTS_CE_EVENTS
+Subject: [PATCH 09/19] net-tcp: add new ca opts flag TCP_CONG_WANTS_CE_EVENTS
 
 Add a a new ca opts flag TCP_CONG_WANTS_CE_EVENTS that allows a
 congestion control module to receive CE events.
@@ -23,7 +23,7 @@ Signed-off-by: Alexandre Frade <kernel@xanmod.org>
 
 --- a/include/net/tcp.h
 +++ b/include/net/tcp.h
-@@ -1035,7 +1035,11 @@ enum tcp_ca_ack_event_flags {
+@@ -1137,7 +1137,11 @@ enum tcp_ca_ack_event_flags {
  #define TCP_CONG_NON_RESTRICTED 0x1
  /* Requires ECN/ECT set on all packets */
  #define TCP_CONG_NEEDS_ECN	0x2
@@ -36,7 +36,7 @@ Signed-off-by: Alexandre Frade <kernel@xanmod.org>
  
  union tcp_cc_info;
  
-@@ -1167,6 +1171,14 @@ static inline char *tcp_ca_get_name_by_k
+@@ -1269,6 +1273,14 @@ static inline char *tcp_ca_get_name_by_k
  }
  #endif
  

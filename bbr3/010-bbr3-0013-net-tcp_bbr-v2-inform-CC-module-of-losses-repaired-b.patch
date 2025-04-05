@@ -1,7 +1,7 @@
-From 2d36fbcc216d52a31aa10b7ffa18d68a4e91e38f Mon Sep 17 00:00:00 2001
+From 43e59a05c78564807876ae8529c71b261e8cceff Mon Sep 17 00:00:00 2001
 From: Jianfeng Wang <jfwang@google.com>
 Date: Tue, 16 Jun 2020 17:41:19 +0000
-Subject: [PATCH 13/18] net-tcp_bbr: v2: inform CC module of losses repaired by
+Subject: [PATCH 13/19] net-tcp_bbr: v2: inform CC module of losses repaired by
  TLP probe
 
 Before this commit, when there is a packet loss that creates a sequence
@@ -25,7 +25,7 @@ Signed-off-by: Alexandre Frade <kernel@xanmod.org>
 
 --- a/include/net/tcp.h
 +++ b/include/net/tcp.h
-@@ -1013,6 +1013,7 @@ enum tcp_ca_event {
+@@ -1115,6 +1115,7 @@ enum tcp_ca_event {
  	CA_EVENT_LOSS,		/* loss timeout */
  	CA_EVENT_ECN_NO_CE,	/* ECT set, but not CE marked */
  	CA_EVENT_ECN_IS_CE,	/* received CE marked IP packet */
@@ -35,7 +35,7 @@ Signed-off-by: Alexandre Frade <kernel@xanmod.org>
  /* Information about inbound ACK, passed to cong_ops->in_ack_event() */
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
-@@ -3813,6 +3813,7 @@ static void tcp_process_tlp_ack(struct s
+@@ -3865,6 +3865,7 @@ static void tcp_process_tlp_ack(struct s
  		/* ACK advances: there was a loss, so reduce cwnd. Reset
  		 * tlp_high_seq in tcp_init_cwnd_reduction()
  		 */
