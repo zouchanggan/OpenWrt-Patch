@@ -1,23 +1,30 @@
-From ba78896dffc386e641ac0eb9397761a24f4b5d87 Mon Sep 17 00:00:00 2001
-From: ZiMing Mo <msylgj@immortalwrt.org>
-Date: Sun, 7 Aug 2022 15:52:55 +0800
-Subject: [PATCH] fix(fw4.uc): adept kernel version type of x.x
+From c359ce4457ac48bb65767ae5415f296e3d25a51d Mon Sep 17 00:00:00 2001
+From: sbwml <admin@cooluc.com>
+Date: Thu, 14 Mar 2024 12:10:03 +0800
+Subject: [PATCH] fw4: add custom nft command support
 
-fix kernel version match if the kernel version type is x.x (not x.x.x)
-
-Signed-off-by: ZiMing Mo <msylgj@immortalwrt.org>
+Signed-off-by: sbwml <admin@cooluc.com>
 ---
- root/usr/share/ucode/fw4.uc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ root/etc/firewall4.user | 3 +++
+ root/sbin/fw4           | 3 ++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+ create mode 100644 root/etc/firewall4.user
 
---- a/root/usr/share/ucode/fw4.uc
-+++ b/root/usr/share/ucode/fw4.uc
-@@ -496,7 +496,7 @@ return {
- 		    v = 0;
+--- /dev/null
++++ b/root/etc/firewall4.user
+@@ -0,0 +1,3 @@
++# This file is interpreted as shell script.
++# Put your custom nft rules here, they will
++# be executed with each firewall (re-)start.
+--- a/root/sbin/fw4
++++ b/root/sbin/fw4
+@@ -33,7 +33,8 @@ start() {
+ 		esac
  
- 		if (fd) {
--		    let m = match(fd.read("line"), /^Linux version ([0-9]+)\.([0-9]+)\.([0-9]+)/);
-+		    let m = match(fd.read("line"), /^Linux version ([0-9]+)\.([0-9]+)\.?([0-9]+)?/);
+ 		ACTION=start \
+-			utpl -S $MAIN | nft $VERBOSE -f $STDIN
++			utpl -S $MAIN | nft $VERBOSE -f $STDIN \
++			; /bin/sh /etc/firewall4.user
  
- 		    v = m ? (+m[1] << 24) | (+m[2] << 16) | (+m[3] << 8) : 0;
- 		    fd.close();
+ 		ACTION=includes \
+ 			utpl -S $MAIN
