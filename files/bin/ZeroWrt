@@ -75,13 +75,15 @@ change_ip() {
     if [[ -n "$new_ip" ]]; then
         uci set network.lan.ipaddr="$new_ip"
         uci commit network
-        /etc/init.d/network restart
         color_output "\e[32mLAN 口 IP 已成功更改为 $new_ip\e[0m"
+        color_output "\e[33m系统将在 10 秒后自动重启，请使用新的 IP 地址重新连接。\e[0m"
+        sleep 10
+        reboot
     else
         color_output "\e[31m无效的 IP 地址，操作取消。\e[0m"
+        read -p "按 Enter 键返回菜单..." 
+        show_menu
     fi
-    read -p "按 Enter 键返回菜单..." 
-    show_menu
 }
 
 # 2. 更改管理员密码
