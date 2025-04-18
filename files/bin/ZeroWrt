@@ -45,11 +45,10 @@ show_menu() {
     color_output "\e[36m┃\e[0m  3. 切换默认主题                       \e[36m┃\e[0m"
     color_output "\e[36m┃\e[0m  4. 恢复出厂设置                       \e[36m┃\e[0m"
     color_output "\e[36m┃\e[0m  5. 一键换源                           \e[36m┃\e[0m"
-    color_output "\e[36m┃\e[0m  6. 一键设置                           \e[36m┃\e[0m"
-    color_output "\e[36m┃\e[0m  7. 一键部署                           \e[36m┃\e[0m"  
-    color_output "\e[36m┃\e[0m  8. IPv6 开关 (仅适用于主路由)         \e[36m┃\e[0m"
-    color_output "\e[36m┃\e[0m  9. iStoreOS 风格化                    \e[36m┃\e[0m"    
-    color_output "\e[36m┃\e[0m  10. 检测更新                          \e[36m┃\e[0m"
+    color_output "\e[36m┃\e[0m  6. 一键部署                           \e[36m┃\e[0m"  
+    color_output "\e[36m┃\e[0m  7. IPv6 开关 (仅适用于主路由)         \e[36m┃\e[0m"
+    color_output "\e[36m┃\e[0m  8. iStoreOS 风格化                    \e[36m┃\e[0m"    
+    color_output "\e[36m┃\e[0m  9. 检测更新                          \e[36m┃\e[0m"
     color_output "\e[36m┃\e[0m  0. 退出                               \e[36m┃\e[0m"
     color_output "\e[36m┃                                        ┃\e[0m"
     color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
@@ -60,11 +59,10 @@ show_menu() {
         3) change_theme ;;
         4) reset_config ;;
         5) change_source ;;
-        6) one_click_setup ;;
-        7) install_apps ;;
-        8) configure_ipv6 ;;
-        9) istore_style ;;
-        10) check_update ;;
+        6) install_apps ;;
+        7) configure_ipv6 ;;
+        8) istore_style ;;
+        9) check_update ;;
         0) exit 0 ;;
         *) echo "无效选项，请重新输入"; show_menu ;;
     esac
@@ -241,304 +239,7 @@ EOF
     show_menu
 }
 
-# 6. 一键设置
-one_click_setup() {
-    while true; do
-        clear
-        color_output "\e[34m[一键设置]\e[0m"
-        color_output "\e[36m┏━━━━━━━━━━━━━━━ 设置选项 ━━━━━━━━━━━━━━━┓\e[0m"
-        color_output "\e[36m┃                                        ┃\e[0m"
-        color_output "\e[36m┃\e[0m  1. SmartDNS + AdGuardHome             \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  2. MosDNS + AdGuardHome               \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  3. 恢复默认设置                       \e[36m┃\e[0m"        
-        color_output "\e[36m┃\e[0m  0. 返回上一级                         \e[36m┃\e[0m"
-        color_output "\e[36m┃                                        ┃\e[0m"
-        color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
-        
-        read -p "$(color_output "\e[33m请输入您的选择 [0-3]: \e[0m")" setup_choice
-
-        case "$setup_choice" in
-            1) 
-                color_output "\e[34m[SmartDNS + AdGuardHome]\e[0m"
-                
-                # 设置LAN口DNS
-                uci set network.lan.dns='127.0.0.1'
-                uci commit network
-
-                # 恢复 MosDNS 配置
-                cp /etc/config/default_mosdns /etc/config/mosdns
-                /etc/init.d/mosdns restart
-
-                # Dnsmasq设置
-                uci set dhcp.@dnsmasq[0].cachesize='0'
-                uci commit dhcp
-                /etc/init.d/dnsmasq restart
-
-                # 配置 SmartDNS
-                uci set smartdns.@smartdns[0].prefetch_domain='1'
-                uci set smartdns.@smartdns[0].port='6053'
-                uci set smartdns.@smartdns[0].seconddns_port='5335'
-                uci set smartdns.@smartdns[0].seconddns_no_rule_addr='1'
-                uci set smartdns.@smartdns[0].seconddns_no_rule_nameserver='0'
-                uci set smartdns.@smartdns[0].seconddns_no_rule_ip='0'
-                uci set smartdns.@smartdns[0].seconddns_no_rule_soa='0'
-                uci set smartdns.@smartdns[0].tcp_server='1'
-                uci set smartdns.@smartdns[0].rr_ttl='600'
-                uci set smartdns.@smartdns[0].seconddns_enabled='1'
-                uci set smartdns.@smartdns[0].server_name='smartdns-China'
-                uci set smartdns.@smartdns[0].seconddns_tcp_server='1'
-                uci set smartdns.@smartdns[0].seconddns_server_group='smartdns-Overseas'
-                uci set smartdns.@smartdns[0].rr_ttl_min='5'
-                uci set smartdns.@smartdns[0].seconddns_no_speed_check='1'
-                uci set smartdns.@smartdns[0].cache_size='190150'
-                uci set smartdns.@smartdns[0].serve_expired='1'
-                uci set smartdns.@smartdns[0].auto_set_dnsmasq='0'
-                uci set smartdns.@smartdns[0].ipv6_server='0'
-                uci set smartdns.@smartdns[0].dualstack_ip_selection='0'
-                uci set smartdns.@smartdns[0].force_aaaa_soa='1'
-                uci set smartdns.@smartdns[0].coredump='1'
-                uci set smartdns.@smartdns[0].speed_check_mode='tcp:443,tcp:80,ping'
-                uci set smartdns.@smartdns[0].resolve_local_hostnames='1'
-                uci set smartdns.@smartdns[0].seconddns_force_aaaa_soa='1'
-                uci set smartdns.@smartdns[0].enable_auto_update='0'
-                uci set smartdns.@smartdns[0].enabled='1'
-                uci set smartdns.@smartdns[0].bind_device='1'
-                uci set smartdns.@smartdns[0].cache_persist='1'
-                uci set smartdns.@smartdns[0].force_https_soa='1'
-                uci set smartdns.@smartdns[0].seconddns_no_dualstack_selection='1'
-                uci set smartdns.@smartdns[0].seconddns_no_cache='1'
-                uci commit smartdns
-                /etc/init.d/smartdns restart
-                
-                # AdguardHome 设置
-                cp /etc/config/default_AdGuardHome /etc/AdGuardHome.yaml
-                sed -i 's/cache_size: .*/cache_size: 0/' /etc/AdGuardHome.yaml
-                sed -i 's/upstream_mode: .*/upstream_mode: parallel/' /etc/AdGuardHome.yaml
-                sed -i 's/upstream_dns_file:.*/upstream_dns_file: \/etc\/AdGuardHome-dnslist.yaml/' /etc/AdGuardHome.yaml
-                uci set AdGuardHome.AdGuardHome.enabled='1'
-                uci set AdGuardHome.AdGuardHome.redirect='dnsmasq-upstream'
-                uci commit AdGuardHome
-                /etc/init.d/AdGuardHome restart
-
-                # passwall 设置
-                uci set passwall.@global[0].dns_shunt='dnsmasq'
-                uci set passwall.@global[0].remote_dns='127.0.0.1:5553'
-                uci set passwall.@global[0].dns_mode='udp'
-                uci commit passwall
-                /etc/init.d/passwall restart
-
-                ### OpenClash设置
-                # 禁用默认DNS配置
-                n=0
-                while [ "$n" -lt $(uci show openclash|grep -c "^openclash.@dns_servers\[[0-9]\{1,10\}\]=dns_servers") ]; do
-                  uci set openclash.@dns_servers[$n].enabled='0'
-                  n=$((n + 1))
-                done
-                # 设置DNS
-                uci add openclash dns_servers
-                uci set openclash.@dns_servers[-1].enabled='1'
-                uci set openclash.@dns_servers[-1].group='nameserver'
-                uci set openclash.@dns_servers[-1].type='udp'
-                uci set openclash.@dns_servers[-1].ip='127.0.0.1'
-                uci set openclash.@dns_servers[-1].port='5553'
-                uci add openclash dns_servers
-                uci set openclash.@dns_servers[-1].enabled='1'
-                uci set openclash.@dns_servers[-1].group='fallback'
-                uci set openclash.@dns_servers[-1].type='udp'
-                uci set openclash.@dns_servers[-1].ip='127.0.0.1'
-                uci set openclash.@dns_servers[-1].port='5553'
-                uci set openclash.config.enable_custom_dns='1'
-                # 模式设置
-                uci set openclash.config.en_mode='fake-ip-mix'
-                # 自定义上游DNS服务器
-                uci set openclash.config.enable_custom_dns='1'
-                # Fake-IP持久化
-                uci set openclash.config.store_fakeip='1'
-                # 启用Fake-IP 过滤器
-                uci set openclash.config.custom_fakeip_filter='1'
-                # 开启绕过服务器地址
-                uci set openclash.config.bypass_gateway_compatible='1'
-                # 禁用本地 DNS 劫持
-                uci set openclash.config.enable_redirect_dns='0'
-                # 开启 GeoIP MMDB 自动更新
-                uci set openclash.config.geoip_auto_update='1'
-                uci set openclash.config.geoip_update_week_time='*'  # 每周更新
-                uci set openclash.config.geoip_update_day_time='3'  # 每周的第 3 天（可以根据需求修改）
-                # 开启 GeoIP Dat 自动更新
-                uci set openclash.config.geo_auto_update='1'
-                uci set openclash.config.geo_update_week_time='*'  # 每周更新
-                uci set openclash.config.geo_update_day_time='1'  # 每周的第 1 天（可以根据需求修改）
-                # 开启 GeoSite 数据库自动更新
-                uci set openclash.config.geosite_auto_update='1'
-                uci set openclash.config.geosite_update_week_time='*'  # 每周更新
-                uci set openclash.config.geosite_update_day_time='4'  # 每周的第 4 天（可以根据需求修改）
-                # 启用大陆白名单订阅自动更新
-                uci set openclash.config.chnr_auto_update='1'  # 开启大陆白名单订阅自动更新
-                uci set openclash.config.chnr_update_week_time='*'  # 每周更新
-                uci set openclash.config.chnr_update_day_time='5'  # 每周的第 5 天（可以根据需求修改）
-                uci commit openclash               
-
-                color_output "\e[32mSmartDNS 和 AdGuardHome 配置完成。\e[0m"
-                read -p "按 Enter 键继续..."
-                ;;
-            2) 
-                color_output "\e[34m[MosDNS + AdGuardHome]\e[0m"
-
-                # 设置LAN口DNS
-                uci set network.lan.dns='127.0.0.1'
-                uci commit network
-
-                # 恢复 SmartDNS 配置
-                cp /etc/config/default_smartdns /etc/config/smartdns
-                /etc/init.d/smartdns restart
-
-                # Dnsmasq设置
-                uci set dhcp.@dnsmasq[0].cachesize='0'
-                uci commit dhcp
-                /etc/init.d/dnsmasq restart
-                
-                # 配置 MosDNS
-                uci set mosdns.config.enabled='1'    
-                uci set mosdns.config.redirect='0'
-                uci set mosdns.config.custom_local_dns='1'
-                uci set mosdns.config.dump_file='1'
-                uci add_list mosdns.config.local_dns='119.29.29.29'  # DNS 服务器
-                uci add_list mosdns.config.local_dns='119.28.28.28'  # DNS 服务器
-                uci add_list mosdns.config.local_dns='223.5.5.5'     # DNS 服务器
-                uci add_list mosdns.config.local_dns='223.6.6.6'     # DNS 服务器
-                uci add_list mosdns.config.local_dns='180.184.1.1'   # DNS 服务器
-                uci add_list mosdns.config.local_dns='114.114.114.114' # DNS 服务器
-                uci add_list mosdns.config.local_dns='https://doh.pub/dns-query'  # DoH 服务器
-                uci add_list mosdns.config.local_dns='quic://dns.alidns.com'  # QUIC 协议
-                uci add_list mosdns.config.local_dns='h3://dns.alidns.com/dns-query'  # HTTP3 协议
-                uci add_list mosdns.config.local_dns='https://dns.alidns.com/dns-query'  # DoH 服务器
-                uci add_list mosdns.config.local_dns='https://doh.360.cn/dns-query'  # 360 DoH
-                uci set mosdns.config.remote_dns='tls://8.8.8.8'
-                uci add_list mosdns.config.remote_dns='tls://1.1.1.1'
-                uci add_list mosdns.config.remote_dns='tls://dns.google'
-                uci add_list mosdns.config.remote_dns='tls://cloudflare-dns.com'
-                uci set mosdns.config.cache='1'
-                uci set mosdns.config.dns_leak='1'
-                uci set mosdns.config.concurrent='2'
-                uci set mosdns.config.minimal_ttl='5'
-                uci set mosdns.config.maximum_ttl='300'  
-                uci commit mosdns
-                /etc/init.d/mosdns restart
-                
-                # 配置 AdGuardHome
-                cp /etc/config/default_AdGuardHome /etc/AdGuardHome.yaml
-                sed -i 's/upstream_dns_file:.*/upstream_dns_file: \/etc\/AdGuardHome-mosdns.yaml/' /etc/AdGuardHome.yaml
-                sed -i 's/cache_size: .*/cache_size: 0/' /etc/AdGuardHome.yaml
-                sed -i 's/upstream_mode: .*/upstream_mode: parallel/' /etc/AdGuardHome.yaml
-                uci set AdGuardHome.AdGuardHome.enabled='1'
-                uci set AdGuardHome.AdGuardHome.redirect='dnsmasq-upstream'
-                uci commit AdGuardHome
-                /etc/init.d/AdGuardHome restart
-
-                # passwall 设置
-                uci set passwall.@global[0].dns_shunt='dnsmasq'
-                uci set passwall.@global[0].remote_dns='127.0.0.1:5553'
-                uci set passwall.@global[0].dns_mode='udp'
-                uci commit passwall
-                /etc/init.d/passwall restart
-
-                ### OpenClash设置
-                # 禁用默认DNS配置
-                n=0
-                while [ "$n" -lt $(uci show openclash|grep -c "^openclash.@dns_servers\[[0-9]\{1,10\}\]=dns_servers") ]; do
-                  uci set openclash.@dns_servers[$n].enabled='0'
-                  n=$((n + 1))
-                done
-                # 设置DNS
-                uci add openclash dns_servers
-                uci set openclash.@dns_servers[-1].enabled='1'
-                uci set openclash.@dns_servers[-1].group='nameserver'
-                uci set openclash.@dns_servers[-1].type='udp'
-                uci set openclash.@dns_servers[-1].ip='127.0.0.1'
-                uci set openclash.@dns_servers[-1].port='5553'
-                uci add openclash dns_servers
-                uci set openclash.@dns_servers[-1].enabled='1'
-                uci set openclash.@dns_servers[-1].group='fallback'
-                uci set openclash.@dns_servers[-1].type='udp'
-                uci set openclash.@dns_servers[-1].ip='127.0.0.1'
-                uci set openclash.@dns_servers[-1].port='5553'
-                uci set openclash.config.enable_custom_dns='1'
-                # 模式设置
-                uci set openclash.config.en_mode='fake-ip-mix'
-                # 自定义上游DNS服务器
-                uci set openclash.config.enable_custom_dns='1'
-                # Fake-IP持久化
-                uci set openclash.config.store_fakeip='1'
-                # 启用Fake-IP 过滤器
-                uci set openclash.config.custom_fakeip_filter='1'
-                # 开启绕过服务器地址
-                uci set openclash.config.bypass_gateway_compatible='1'
-                # 禁用本地 DNS 劫持
-                uci set openclash.config.enable_redirect_dns='0'
-                # 开启 GeoIP MMDB 自动更新
-                uci set openclash.config.geoip_auto_update='1'
-                uci set openclash.config.geoip_update_week_time='*'  # 每周更新
-                uci set openclash.config.geoip_update_day_time='3'  # 每周的第 3 天（可以根据需求修改）
-                # 开启 GeoIP Dat 自动更新
-                uci set openclash.config.geo_auto_update='1'
-                uci set openclash.config.geo_update_week_time='*'  # 每周更新
-                uci set openclash.config.geo_update_day_time='1'  # 每周的第 1 天（可以根据需求修改）
-                # 开启 GeoSite 数据库自动更新
-                uci set openclash.config.geosite_auto_update='1'
-                uci set openclash.config.geosite_update_week_time='*'  # 每周更新
-                uci set openclash.config.geosite_update_day_time='4'  # 每周的第 4 天（可以根据需求修改）
-                # 启用大陆白名单订阅自动更新
-                uci set openclash.config.chnr_auto_update='1'  # 开启大陆白名单订阅自动更新
-                uci set openclash.config.chnr_update_week_time='*'  # 每周更新
-                uci set openclash.config.chnr_update_day_time='5'  # 每周的第 5 天（可以根据需求修改）
-                uci commit openclash      
-
-                color_output "\e[32mMosDNS 和 AdGuardHome 配置完成。\e[0m"
-                read -p "按 Enter 键继续..."
-                ;;
-            3)
-                color_output "\e[34m[恢复默认设置]\e[0m"
-
-                # 取消LAN口DNS
-                uci delete network.lan.dns
-                uci commit network
-                # 恢复 SmartDNS 配置
-                cp /etc/config/default_smartdns /etc/config/smartdns
-                /etc/init.d/smartdns restart
-                # 恢复 MosDNS 配置
-                cp /etc/config/default_mosdns /etc/config/mosdns
-                /etc/init.d/mosdns restart
-                # 恢复 adguardhome
-                uci set AdGuardHome.AdGuardHome.enabled='0'
-                uci set AdGuardHome.AdGuardHome.redirect='none'                             
-                cp /etc/config/default_AdGuardHome /etc/AdGuardHome.yaml
-                sed -i 's/upstream_dns_file:.*/upstream_dns_file: \/etc\/AdGuardHome-dns.yaml/' /etc/AdGuardHome.yaml
-                uci commit AdGuardHome
-                /etc/init.d/AdGuardHome restart
-                # 恢复 passwall
-                cp /etc/config/default_passwall /etc/config/passwall
-                /etc/init.d/passwall restart                
-                # 恢复 openclash
-                cp /etc/config/default_openclash /etc/config/openclash
-                uci commit openclash
-                /etc/init.d/openclash restart
-                 
-                color_output "\e[32m恢复默认设置 配置完成。\e[0m"
-                read -p "按 Enter 键继续..."
-                ;;
-            0) 
-                show_menu 
-                return 
-                ;;  # 返回上一层菜单
-            *) 
-                color_output "\e[31m无效选项，返回菜单。\e[0m" 
-                continue 
-                ;;
-        esac
-    done
-}
-
-# 7. 一键部署
+# 6. 一键部署
 install_apps() {
     while true; do
         clear
@@ -783,7 +484,7 @@ install_apps() {
     done
 }
 
-# 8. IPv6 开关
+# 7. IPv6 开关
 configure_ipv6() {
     color_output "\e[34m[IPv6 设置]\e[0m"
     
@@ -882,7 +583,7 @@ configure_ipv6() {
     show_menu
 }
 
-# 9. iStoreOS 风格化
+# 8. iStoreOS 风格化
 istore_style() {
     clear
     color_output "\e[34m[开始安装 iStoreOS 风格化]\e[0m"
@@ -903,7 +604,7 @@ istore_style() {
     show_menu
 }
 
-# 10. 检测更新
+# 9. 检测更新
 check_update() {
     color_output "\e[34m[检测更新]\e[0m"
     color_output "正在检查更新..."
