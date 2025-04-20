@@ -466,16 +466,16 @@ install_apps() {
         else
             color_output "\e[34m[One-click Deployment]\e[0m"
             color_output "\e[36m┏━━━━━━━━━━━━━━━ DEPLOYMENT ━━━━━━━━━━━━━━━┓\e[0m"
-            color_output "\e[36m┃                                        ┃\e[0m"
-            color_output "\e[36m┃\e[0m  1. Deploy ShellClash                \e[36m┃\e[0m"
-            color_output "\e[36m┃\e[0m  2. Deploy XiaoYa Alist              \e[36m┃\e[0m"
-            color_output "\e[36m┃\e[0m  3. Deploy Subconverter              \e[36m┃\e[0m"
-            color_output "\e[36m┃\e[0m  4. Deploy AdGuardhome               \e[36m┃\e[0m"
-            color_output "\e[36m┃\e[0m  5. Deploy Gitea-MySQL               \e[36m┃\e[0m"
-            color_output "\e[36m┃\e[0m  6. Deploy SunPanel                  \e[36m┃\e[0m"        
-            color_output "\e[36m┃\e[0m  0. Back to Main Menu                \e[36m┃\e[0m"
-            color_output "\e[36m┃                                        ┃\e[0m"
-            color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
+            color_output "\e[36m┃                                          ┃\e[0m"
+            color_output "\e[36m┃\e[0m  1. Deploy ShellClash                    \e[36m┃\e[0m"
+            color_output "\e[36m┃\e[0m  2. Deploy XiaoYa Alist                  \e[36m┃\e[0m"
+            color_output "\e[36m┃\e[0m  3. Deploy Subconverter                  \e[36m┃\e[0m"
+            color_output "\e[36m┃\e[0m  4. Deploy AdGuardhome                   \e[36m┃\e[0m"
+            color_output "\e[36m┃\e[0m  5. Deploy Gitea-MySQL                   \e[36m┃\e[0m"
+            color_output "\e[36m┃\e[0m  6. Deploy SunPanel                      \e[36m┃\e[0m"        
+            color_output "\e[36m┃\e[0m  0. Back to Main Menu                    \e[36m┃\e[0m"
+            color_output "\e[36m┃                                          ┃\e[0m"
+            color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
             read -p "$(color_output "\e[33mEnter your choice [0-6]: \e[0m")" app_choice
         fi
 
