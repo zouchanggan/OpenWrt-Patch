@@ -22,6 +22,7 @@ select_language() {
     color_output ""
     color_output "1. 中文"
     color_output "2. English"
+    color_output "0. 退出/Exit"  
     color_output ""
     color_output "\e[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     
@@ -30,6 +31,7 @@ select_language() {
         case "$LANG_CHOICE" in
             1) LANG_CHOICE="zh";;
             2) LANG_CHOICE="en";;
+            0) exit 0 ;;
             *) 
                 color_output "\e[31m无效选择，请重新输入\e[0m"
                 LANG_CHOICE=""
@@ -163,10 +165,11 @@ show_menu() {
         color_output "\e[36m┃\e[0m  3. 切换默认主题                       \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  4. 恢复出厂设置                       \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  5. 一键换源                           \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  6. 一键部署                           \e[36m┃\e[0m"  
-        color_output "\e[36m┃\e[0m  7. IPv6 开关 (仅适用于主路由)         \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  8. iStoreOS 风格化                    \e[36m┃\e[0m"    
-        color_output "\e[36m┃\e[0m  9. 检测更新                           \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  6. 一键部署                           \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  7. 一键加载所有驱动                   \e[36m┃\e[0m"          
+        color_output "\e[36m┃\e[0m  8. IPv6 开关 (仅适用于主路由)         \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  9. iStoreOS 风格化                    \e[36m┃\e[0m"    
+        color_output "\e[36m┃\e[0m  10. 检测更新                          \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  0. 退出                               \e[36m┃\e[0m"
         color_output "\e[36m┃                                        ┃\e[0m"
         color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
@@ -179,10 +182,11 @@ show_menu() {
         color_output "\e[36m┃\e[0m  3. Switch Default Theme              \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  4. Factory Reset                     \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  5. Change Software Sources           \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  6. One-click Deployment              \e[36m┃\e[0m"  
-        color_output "\e[36m┃\e[0m  7. IPv6 Toggle (Main Router Only)    \e[36m┃\e[0m"
-        color_output "\e[36m┃\e[0m  8. iStoreOS Styling                  \e[36m┃\e[0m"    
-        color_output "\e[36m┃\e[0m  9. Check for Updates                 \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  6. One-click Deployment              \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  7. One-click loading of all drivers  \e[36m┃\e[0m" 
+        color_output "\e[36m┃\e[0m  8. IPv6 Toggle (Main Router Only)    \e[36m┃\e[0m"
+        color_output "\e[36m┃\e[0m  9. iStoreOS Styling                  \e[36m┃\e[0m"    
+        color_output "\e[36m┃\e[0m  10. Check for Updates                \e[36m┃\e[0m"
         color_output "\e[36m┃\e[0m  0. Exit                              \e[36m┃\e[0m"
         color_output "\e[36m┃                                       ┃\e[0m"
         color_output "\e[36m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
@@ -196,9 +200,10 @@ show_menu() {
         4) reset_config ;;
         5) change_source ;;
         6) install_apps ;;
-        7) configure_ipv6 ;;
-        8) istore_style ;;
-        9) check_update ;;
+        7) Load_driver ;;
+        8) configure_ipv6 ;;
+        9) istore_style ;;
+        10) check_update ;;
         0) exit 0 ;;
         *) 
             if [[ "$LANG_CHOICE" == "zh" ]]; then
@@ -867,8 +872,20 @@ install_apps() {
         esac
     done
 }
+# 7. 加载驱动
+Load_driver() {
+    if [[ "$LANG_CHOICE" == "zh" ]]; then
+        color_output "\e[34m[加载所有驱动]\e[0m"
+    else
+        color_output "\e[34m[Load all drivers]\e[0m"
+    fi
+    opkg update && opkg install aircard-pcmcia-firmware ar3k-firmware ath10k-board-qca4019 ath10k-board-qca9377 ath10k-board-qca9887 ath10k-board-qca9888 ath10k-board-qca988x ath10k-board-qca9984 ath10k-board-qca99x0 ath10k-firmware-qca4019 ath10k-firmware-qca4019-ct ath10k-firmware-qca4019-ct-full-htt ath10k-firmware-qca4019-ct-htt ath10k-firmware-qca6174 ath10k-firmware-qca9377 ath10k-firmware-qca9887 ath10k-firmware-qca9887-ct ath10k-firmware-qca9887-ct-full-htt ath10k-firmware-qca9888 ath10k-firmware-qca9888-ct ath10k-firmware-qca9888-ct-full-htt ath10k-firmware-qca9888-ct-htt ath10k-firmware-qca988x ath10k-firmware-qca988x-ct ath10k-firmware-qca988x-ct-full-htt ath10k-firmware-qca9984 ath10k-firmware-qca9984-ct ath10k-firmware-qca9984-ct-full-htt ath10k-firmware-qca9984-ct-htt ath10k-firmware-qca99x0 ath10k-firmware-qca99x0-ct ath10k-firmware-qca99x0-ct-full-htt ath10k-firmware-qca99x0-ct-htt ath11k-firmware-ipq8074 ath11k-firmware-qca6390 ath11k-firmware-qcn9074 ath11k-firmware-wcn6750 ath11k-firmware-wcn6855 ath12k-firmware-wcn7850 ath6k-firmware ath9k-htc-firmware brcmfmac-firmware-4329-sdio brcmfmac-firmware-4339-sdio brcmfmac-firmware-43430a0-sdio brcmfmac-firmware-43456-sdio brcmfmac-firmware-4356-sdio brcmfmac-firmware-43602a1-pcie brcmfmac-firmware-4366b1-pcie brcmfmac-firmware-4366c0-pcie-k3 brcmfmac-firmware-43752-sdio brcmfmac-firmware-usb brcmfmac-nvram-43430-sdio brcmfmac-nvram-43455-sdio brcmfmac-nvram-43456-sdio brcmfmac-nvram-4356-sdio brcmfmac-nvram-43752-sdio brcmsmac-firmware broadcom-4306-sprom broadcom-43112-sprom broadcom-43131-sprom broadcom-4313-sprom broadcom-4318-sprom broadcom-43217-sprom broadcom-4321-sprom broadcom-43222-sprom broadcom-43224-sprom broadcom-43225-sprom broadcom-43226-sprom broadcom-43227-sprom broadcom-43228-sprom broadcom-4322-sprom broadcom-4331-sprom broadcom-43428-sprom broadcom-4360-sprom broadcom-6362-sprom carl9170-firmware cypress-firmware-43012-sdio cypress-firmware-43340-sdio cypress-firmware-43362-sdio cypress-firmware-4339-sdio cypress-firmware-43430-sdio cypress-firmware-43439-sdio cypress-firmware-43455-sdio cypress-firmware-4354-sdio cypress-firmware-4356-pcie cypress-firmware-4356-sdio cypress-firmware-43570-pcie cypress-firmware-4373-pcie cypress-firmware-4373-sdio cypress-firmware-4373-usb cypress-firmware-54591-pcie cypress-firmware-54591-sdio cypress-firmware-55560-pcie cypress-firmware-55572-pcie cypress-firmware-55572-sdio cypress-nvram-4339-sdio dvb-firmware e100-firmware edgeport-firmware eip197-mini-firmware ibt-firmware iwl3945-firmware iwl4965-firmware iwlwifi-firmware-ax200 iwlwifi-firmware-ax210 iwlwifi-firmware-iwl1000 iwlwifi-firmware-iwl100 iwlwifi-firmware-iwl105 iwlwifi-firmware-iwl135 iwlwifi-firmware-iwl2000 iwlwifi-firmware-iwl2030 iwlwifi-firmware-iwl3160 iwlwifi-firmware-iwl3168 iwlwifi-firmware-iwl5000 iwlwifi-firmware-iwl5150 iwlwifi-firmware-iwl6000g2 iwlwifi-firmware-iwl6000g2a iwlwifi-firmware-iwl6000g2b iwlwifi-firmware-iwl6050 iwlwifi-firmware-iwl7260 iwlwifi-firmware-iwl7265 iwlwifi-firmware-iwl7265d iwlwifi-firmware-iwl8260c iwlwifi-firmware-iwl8265 iwlwifi-firmware-iwl9000 iwlwifi-firmware-iwl9260 kmod-3c59x kmod-6lowpan kmod-ag71xx kmod-alx kmod-ar5523 kmod-at86rf230 kmod-ath10k kmod-ath10k-ct kmod-ath10k-ct-smallbuffers kmod-ath10k-sdio kmod-ath10k-smallbuffers kmod-ath11k kmod-ath11k-pci kmod-ath12k kmod-ath5k kmod-ath6kl kmod-ath6kl-sdio kmod-ath6kl-usb kmod-ath9k-common kmod-atl1 kmod-atl1c kmod-atl1e kmod-atl2 kmod-atm kmod-atusb kmod-b43 kmod-b44 kmod-bcma kmod-be2net kmod-bnxt-en kmod-brcmfmac kmod-brcmsmac kmod-brcmutil kmod-ca8210 kmod-carl9170 kmod-cc2520 kmod-cfg80211 kmod-crypto-michael-mic kmod-dm9000 kmod-dummy kmod-e100 kmod-eeprom-93cx6 kmod-et131x kmod-ethoc kmod-fakelb kmod-fixed-phy kmod-hfcmulti kmod-hfcpci kmod-ieee802154 kmod-ieee802154-6lowpan kmod-ifb kmod-ipvlan kmod-iwlwifi kmod-lan743x kmod-lib-cordic kmod-lib-crc8 kmod-lib-crc-itu-t kmod-mac80211 kmod-mac80211-hwsim kmod-mac802154 kmod-mdio-gpio kmod-mhi-net kmod-mhi-wwan-ctrl kmod-mhi-wwan-mbim kmod-misdn kmod-mrf24j40 kmod-mt7601u kmod-mt7603 kmod-mt7615-common kmod-mt7615e kmod-mt7615-firmware kmod-mt7622-firmware kmod-mt7663-firmware-ap kmod-mt7663-firmware-sta kmod-mt7663s kmod-mt7663u kmod-mt7663-usb-sdio kmod-mt76-core kmod-mt76x0e kmod-mt76x2-common kmod-mt7915e kmod-mt7925e kmod-mt7925-firmware kmod-mt7925u kmod-mt7992-23-firmware kmod-mt7992-firmware kmod-mt7996-233-firmware kmod-mt7996e kmod-mt7996-firmware-common kmod-mtk-t7xx kmod-mwifiex-pcie kmod-mwifiex-sdio kmod-mwl8k kmod-natsemi kmod-ne2k-pci kmod-niu kmod-owl-loader kmod-phy-airoha-en8811h kmod-phy-aquantia kmod-phy-at803x kmod-phy-bcm84881 kmod-phy-broadcom kmod-phylib-broadcom kmod-phy-marvell-10g kmod-phy-microchip kmod-phy-realtek kmod-phy-smsc kmod-qlcnic kmod-r6040 kmod-regmap-spi kmod-rmnet kmod-rsi91x kmod-rsi91x-sdio kmod-rsi91x-usb kmod-rt2800-lib kmod-rt2800-mmio kmod-rt2800-pci kmod-rt2800-usb kmod-rt2x00-lib kmod-rt2x00-mmio kmod-rt2x00-pci kmod-rt2x00-usb kmod-rt61-pci kmod-rt73-usb kmod-rtl8192c-common kmod-rtl8192ce kmod-rtl8192cu kmod-rtl8192de kmod-rtl8192se kmod-rtl8723bs kmod-rtl8812au-ct kmod-rtl8821ae kmod-rtl8xxxu kmod-rtlwifi kmod-rtlwifi-btcoexist kmod-rtlwifi-pci kmod-rtlwifi-usb kmod-rtw88 kmod-rtw88-8723de kmod-rtw88-8723ds kmod-rtw88-8723du kmod-rtw88-8812au kmod-rtw88-8821au kmod-rtw88-8821ce kmod-rtw88-8821cu kmod-rtw88-8822be kmod-rtw88-8822bu kmod-rtw88-8822ce kmod-rtw88-8822cu kmod-rtw89-8851be kmod-rtw89-8852ae kmod-rtw89-8852be kmod-rtw89-8852ce kmod-rtw89-8922ae kmod-sfc kmod-sfc-falcon kmod-sfp kmod-siit kmod-sis190 kmod-sis900 kmod-skge kmod-sky2 kmod-solos-pci kmod-spi-ks8995 kmod-ssb kmod-swconfig kmod-switch-ip17xx kmod-switch-rtl8306 kmod-thermal kmod-usb-atm kmod-usb-atm-cxacru kmod-usb-atm-speedtouch kmod-usb-atm-ueagle kmod-usb-cm109 kmod-usb-hid-cp2112 kmod-usb-net-dm9601-ether kmod-usb-net-mcs7830 kmod-usb-net-smsc95xx kmod-usb-net-sr9700 kmod-via-rhine kmod-wil6210 kmod-wl12xx kmod-wl18xx kmod-wlcore libertas-sdio-firmware libertas-spi-firmware libertas-usb-firmware midisport-firmware mt7601u-firmware mt7622bt-firmware mt7921bt-firmware mt7922bt-firmware mt7981-wo-firmware mt7986-wo-firmware mwifiex-pcie-firmware mwifiex-sdio-firmware mwl8k-firmware p54-pci-firmware p54-spi-firmware p54-usb-firmware r8152-firmware r8169-firmware radeon-firmware rs9113-firmware rt2800-pci-firmware rt2800-usb-firmware rt61-pci-firmware rt73-usb-firmware rtl8188eu-firmware rtl8192ce-firmware rtl8192cu-firmware rtl8192de-firmware rtl8192eu-firmware rtl8192se-firmware rtl8723au-firmware rtl8723bu-firmware rtl8761a-firmware rtl8761b-firmware rtl8761bu-firmware rtl8821ae-firmware rtl8821ce-firmware rtl8822be-firmware rtl8822ce-firmware ti-3410-firmware ti-5052-firmware wil6210-firmware wl12xx-firmware wl18xx-firmware wpad-openssl --force-depends
+    clear
+    read -p "$([[ "$LANG_CHOICE" == "zh" ]] && echo "按 Enter 键返回主菜单..." || echo "Press Enter to return to main menu...")"
+    show_menu
+}
 
-# 7. IPv6 开关
+# 8. IPv6 开关
 configure_ipv6() {
     if [[ "$LANG_CHOICE" == "zh" ]]; then
         color_output "\e[34m[IPv6 设置]\e[0m"
@@ -1005,7 +1022,7 @@ configure_ipv6() {
     show_menu
 }
 
-# 8. iStoreOS 风格化
+# 9. iStoreOS 风格化
 istore_style() {
     clear
     if [[ "$LANG_CHOICE" == "zh" ]]; then
@@ -1045,7 +1062,7 @@ istore_style() {
     show_menu
 }
 
-# 9. 检测更新
+# 10. 检测更新
 check_update() {
     if [[ "$LANG_CHOICE" == "zh" ]]; then
         color_output "\e[34m[检测更新]\e[0m"
